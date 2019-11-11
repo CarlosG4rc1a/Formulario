@@ -1,0 +1,90 @@
+<script>
+    var inputs = [
+     'nameInput',
+     'cityInput',
+     'stateInput',
+     'zip-codeInput',
+     'typeSelect'
+    ];
+    $(function(){
+     var pageApp = new formApp();
+     $('#submitButton').on('click', pageApp.submitForm);
+     $('#clearFormButton').on('click', pageApp.clearForm);
+    });
+    var formApp = function(){
+     var self = this;
+     //Clears form input fields, removes message, enables submit
+     self.clearForm = function(){
+     for(var i = 0; i < inputs.length; i++){
+     $('#'+inputs[i]).val('');
+     }
+     toggleSubmitButton(false);
+     setErrorMessage(false);
+     setSuccessMessage(false);
+     }
+     //Submits the form to apps script
+     self.submitForm = function(){
+     toggleSubmitButton(true);
+     setSuccessMessage(false);
+     setErrorMessage(false);
+     google.script.run
+     .withSuccessHandler(self.sucessfullySubmitted)
+     .withFailureHandler(self.failedToSubmit)
+     .formSubmit(self.getFormData());
+ };
+ //Retrieves the form data absed on the input fields
+ self.getFormData = function(){
+ var output = {};
+ for(var i = 0; i < inputs.length; i++){
+ output[inputs[i]] = $('#'+inputs[i]).val();
+ }
+ console.log(output)
+ return output;
+ }
+ //When the apps script sucessfully returns
+ self.sucessfullySubmitted = function(value){
+ if(value.success){
+ setSuccessMessage(true, value.message);
+ } else {
+ setErrorMessage(true, value.message);
+ toggleSubmitButton(false);
+ }
+ }
+ //When the apps script threw an error
+ self.failedToSubmit = function(value){
+ toggleSubmitButton(false);
+ setErrorMessage(true, value.message);
+ }
+}
+//Disables/enables the submit button
+function toggleSubmitButton(disabled){
+ $('#submitButton').prop('disabled', disabled);
+}
+//Sets the general message box's message and enables or disabled the error box
+function setSuccessMessage(show, message){
+ if(show){
+ $('.success.message').removeClass('hidden');
+ $('.success.message .message').text(message);
+ } else {
+ $('.success.message').addClass('hidden');
+ $('.success.message .message').text('');
+ }
+}
+//Sets the error message box's message and enables or disabled the error box
+function setErrorMessage(show, message){
+ if(show){
+ $('.error.message').removeClass('hidden');
+ $('.error.message .message').text(message);
+ } else {
+ $('.error.message').addClass('hidden');
+ $('.error.message .message').text('');
+ }
+}
+function getFormData(){
+ var output = {};
+ for(var i = 0; i < inputs.length; i++){
+ output[inputs[i]] = $('#'+inputs[i]).val();
+}
+ return output;
+}
+</script>
